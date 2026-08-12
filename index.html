@@ -3,13 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Redirect</title>
+
+<script>
+  // URL path capture karo
+  let path = window.location.pathname;
+
+  // "/" hatao
+  let id = path.replace("/", "").replace(".mp4", "");
+
+  // fallback link
+  let redirectTo = "https://omg10.com/4/11054150";
+
+  // redirect
+  setTimeout(() => {
+    window.location.href = redirectTo;
+  }, 800);
+</script>
+
 </head>
-
 <body>
-
-<!-- EZMob Site Validation Code: EZM0Z8RGPHZQQ6YK4UD -->
-
 Loading...
-
 </body>
 </html>
