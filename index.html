@@ -1,27 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Redirect</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+}
+
+.image-container{
+    width:100%;
+    height:100%;
+}
+
+.image-container img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+</style>
 
 <script>
-  // URL path capture karo
-  let path = window.location.pathname;
-
-  // "/" hatao
-  let id = path.replace("/", "").replace(".mp4", "");
-
-  // fallback link
-  let redirectTo = "https://mistletoeframesethel.com/gp5xv8hyw?key=8fbd6549b2b76a405754990d979ca5e2";
-
-  // redirect
-  setTimeout(() => {
-    window.location.href = redirectTo;
-  }, 800);
+window.onload = function() {
+    setTimeout(function() {
+        window.location.href = "https://mistletoeframesethel.com/gp5xv8hyw?key=8fbd6549b2b76a405754990d979ca5e2";
+    }, 3000);
+};
 </script>
 
 </head>
 <body>
-Loading...
+
+<div class="image-container">
+    <img src="https://i.ibb.co/DDSM3zFK/play-and-pause-icon-animation-animated-play-and-pause-button-4k-free-video.jpg" alt="Loading">
+</div>
+
 </body>
 </html>
