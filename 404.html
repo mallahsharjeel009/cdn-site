@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Loading</title>
+</head>
+<body style="margin:0;background:#000">
+<script>
+const p = decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g,"");
+if (/^video\/[^/]+$/i.test(p)) {
+  const id = p.split("/")[1];
+  location.replace("/?video=" + encodeURIComponent(id));
+} else if (p) {
+  location.replace("/" + encodeURIComponent(p));
+} else {
+  location.replace("/");
+}
+</script>
+</body>
+</html>
