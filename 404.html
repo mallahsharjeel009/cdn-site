@@ -1,21 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Loading</title>
+<title>Loading...</title>
 </head>
-<body style="margin:0;background:#000">
+
+<body style="background:#000">
+
 <script>
-const p = decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g,"");
-if (/^video\/[^/]+$/i.test(p)) {
-  const id = p.split("/")[1];
-  location.replace("/?video=" + encodeURIComponent(id));
-} else if (p) {
-  location.replace("/" + encodeURIComponent(p));
-} else {
-  location.replace("/");
+
+const path =
+decodeURIComponent(
+    window.location.pathname
+).replace(/^\/+|\/+$/g,"");
+
+
+if(/^video\/[^/]+$/i.test(path)){
+
+    const id =
+        path.split("/")[1];
+
+    window.location.replace(
+        "/?video=" +
+        encodeURIComponent(id)
+    );
+
 }
+else if(path){
+
+    window.location.replace(
+        "/?redirect=" +
+        encodeURIComponent(path)
+    );
+
+}
+else{
+
+    window.location.replace("/");
+
+}
+
 </script>
+
 </body>
 </html>
