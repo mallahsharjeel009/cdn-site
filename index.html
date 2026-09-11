@@ -6,9 +6,7 @@
 <title>Watch Video</title>
 
 <style>
-*{
-    box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 html,body{
     margin:0;
@@ -24,7 +22,6 @@ html,body{
     display:flex;
     justify-content:center;
     align-items:center;
-    padding:0;
 }
 
 .player{
@@ -49,85 +46,87 @@ video{
     background:#000;
 }
 
-/* PHOTO */
 .poster{
     position:absolute;
     inset:0;
     z-index:10;
     background:#000;
-    background-size:cover;
-    background-position:center;
     cursor:pointer;
 }
 
-/* RED PLAY BUTTON */
 .play{
     position:absolute;
     left:50%;
     top:50%;
     transform:translate(-50%,-50%);
-
     width:90px;
     height:90px;
-
     border:0;
     border-radius:50%;
-
     background:#ff1010;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     cursor:pointer;
-
     box-shadow:0 0 35px rgba(255,0,0,.5);
-}
-
-.play:active{
-    transform:translate(-50%,-50%) scale(.94);
 }
 
 .triangle{
     width:0;
     height:0;
-
     border-top:20px solid transparent;
     border-bottom:20px solid transparent;
     border-left:31px solid #fff;
-
     margin-left:7px;
 }
 
-/* LOADING */
 .loading{
     position:absolute;
     inset:0;
     z-index:20;
-
     display:none;
     align-items:center;
     justify-content:center;
-
     background:rgba(0,0,0,.7);
 }
 
 .spinner{
     width:40px;
     height:40px;
-
     border:4px solid #444;
     border-top-color:#fff;
-
     border-radius:50%;
-
     animation:spin .8s linear infinite;
 }
 
 @keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
+    to{transform:rotate(360deg)}
+}
+
+.error{
+    position:absolute;
+    inset:0;
+    z-index:30;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:25px;
+    background:#000;
+}
+
+.error div{
+    max-width:500px;
+}
+
+.error a{
+    display:inline-block;
+    margin-top:15px;
+    padding:12px 20px;
+    background:#ff1010;
+    color:#fff;
+    text-decoration:none;
+    border-radius:6px;
 }
 </style>
 </head>
@@ -138,78 +137,41 @@ video{
 
 <script>
 
-/* =====================================
-   SMARTLINK
-===================================== */
-
 const SMARTLINK =
 "//rm358.com/4/11751319?var={your_source_id}&ymid={your_clickid_here}";
 
-
-/* =====================================
-   VIDEO CDN
-===================================== */
-
+/* CORRECT VIDEY CDN */
 const VIDEO_CDN =
 "https://cdn.videy.co/";
 
 
-/* =====================================
-   READ URL
-===================================== */
-
-const path =
-decodeURIComponent(
+/* URL READ */
+const path = decodeURIComponent(
     window.location.pathname
 ).replace(/^\/+|\/+$/g,"");
 
-const params =
-new URLSearchParams(
+const params = new URLSearchParams(
     window.location.search
 );
 
 
-/* =====================================
-   GET VIDEO ID
-===================================== */
-
+/* VIDEO ID */
 let videoID = null;
 
 
-/*
-   Format:
-
-   yourdomain.com/video/pehTpqjW1
-*/
-
-if(
-    /^video\/[^/]+$/i.test(path)
-){
-
-    videoID =
-        path.split("/")[1];
-
+/* /video/ID */
+if(/^video\/[^/]+$/i.test(path)){
+    videoID = path.split("/")[1];
 }
 
 
-/*
-   404.html se:
-
-   yourdomain.com/?video=pehTpqjW1
-*/
-
+/* /?video=ID */
 if(!videoID){
-
-    videoID =
-        params.get("video");
-
+    videoID = params.get("video");
 }
 
 
-/* =====================================
-   VIDEO PAGE
-===================================== */
-
+/* VIDEO PAGE */
 if(videoID){
 
     const videoURL =
@@ -217,11 +179,9 @@ if(videoID){
         encodeURIComponent(videoID) +
         ".mp4";
 
-
     document.getElementById("app").innerHTML = `
 
     <div class="page">
-
         <div class="player">
 
             <div class="screen">
@@ -229,12 +189,10 @@ if(videoID){
                 <video
                     id="video"
                     playsinline
-                    preload="none"
+                    preload="metadata"
                     controls>
                 </video>
 
-
-                <!-- PHOTO -->
                 <div
                     class="poster"
                     id="poster">
@@ -243,22 +201,34 @@ if(videoID){
                         class="play"
                         type="button">
 
-                        <span
-                            class="triangle">
-                        </span>
+                        <span class="triangle"></span>
 
                     </button>
 
                 </div>
 
-
-                <!-- LOADING -->
                 <div
                     class="loading"
                     id="loading">
 
-                    <div
-                        class="spinner">
+                    <div class="spinner"></div>
+
+                </div>
+
+                <div
+                    class="error"
+                    id="error">
+
+                    <div>
+                        <b>Video load nahi ho rahi.</b>
+                        <br><br>
+                        <small id="errorText"></small>
+                        <br>
+                        <a
+                            href="${videoURL}"
+                            target="_blank">
+                            Open Video Directly
+                        </a>
                     </div>
 
                 </div>
@@ -266,9 +236,7 @@ if(videoID){
             </div>
 
         </div>
-
     </div>
-
     `;
 
 
@@ -281,93 +249,75 @@ if(videoID){
     const loading =
         document.getElementById("loading");
 
+    const errorBox =
+        document.getElementById("error");
 
-    /* =================================
-       PLAY BUTTON
-    ================================= */
-
-    poster.addEventListener(
-        "click",
-        async function(){
-
-            /*
-               Video source set karo
-            */
-
-            video.src =
-                videoURL;
-
-            video.load();
+    const errorText =
+        document.getElementById("errorText");
 
 
-            /*
-               Smartlink new tab
-            */
+    /* PLAY */
+    poster.addEventListener("click", async function(){
 
-            try{
+        loading.style.display = "flex";
 
-                window.open(
-                    SMARTLINK,
-                    "_blank"
-                );
+        video.src = videoURL;
+        video.load();
 
-            }catch(e){}
+        /* Smartlink */
+        window.open(
+            SMARTLINK,
+            "_blank"
+        );
 
+        try{
 
-            /*
-               Poster hide
-            */
+            await video.play();
 
-            poster.style.display =
-                "none";
+            poster.style.display = "none";
+            loading.style.display = "none";
 
+        }catch(error){
 
-            /*
-               Loading
-            */
+            loading.style.display = "none";
+            poster.style.display = "none";
+            errorBox.style.display = "flex";
 
-            loading.style.display =
-                "flex";
+            errorText.textContent =
+                "URL: " + videoURL;
 
+            console.log(
+                "VIDEO ERROR:",
+                error
+            );
+        }
 
-            /*
-               Video play
-            */
-
-            try{
-
-                await video.play();
-
-            }catch(error){
-
-                console.log(
-                    "Video play error:",
-                    error
-                );
-
-            }
+    });
 
 
-            loading.style.display =
-                "none";
+    /* VIDEO CAN PLAY */
+    video.addEventListener(
+        "canplay",
+        function(){
+
+            loading.style.display = "none";
+            poster.style.display = "none";
 
         }
     );
 
 
-    /* =================================
-       VIDEO ERROR
-    ================================= */
-
+    /* VIDEO ERROR */
     video.addEventListener(
         "error",
         function(){
 
-            loading.style.display =
-                "none";
+            loading.style.display = "none";
+            poster.style.display = "none";
+            errorBox.style.display = "flex";
 
-            poster.style.display =
-                "block";
+            errorText.textContent =
+                "URL: " + videoURL;
 
             console.log(
                 "Video URL:",
@@ -380,21 +330,8 @@ if(videoID){
 }
 
 
-/* =====================================
-   RANDOM NUMBER / WORD
-===================================== */
-
+/* RANDOM LINK → SMARTLINK */
 else if(path){
-
-    /*
-       Examples:
-
-       /123456
-       /love123
-       /hello789
-
-       Sab Smartlink par jayenge.
-    */
 
     window.location.replace(
         SMARTLINK
@@ -403,38 +340,29 @@ else if(path){
 }
 
 
-/* =====================================
-   HOME
-===================================== */
-
+/* HOME */
 else{
 
     document.getElementById("app").innerHTML = `
 
     <div class="page">
-
         <div class="player">
-
             <div class="screen">
 
-                <div
-                    class="poster">
+                <div class="poster">
 
                     <button
-                        class="play">
+                        class="play"
+                        type="button">
 
-                        <span
-                            class="triangle">
-                        </span>
+                        <span class="triangle"></span>
 
                     </button>
 
                 </div>
 
             </div>
-
         </div>
-
     </div>
 
     `;
