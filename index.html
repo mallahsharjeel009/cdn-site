@@ -7,84 +7,117 @@
 
 <style>
 *{box-sizing:border-box}
+
 html,body{
- margin:0;padding:0;background:#000;color:#fff;
- font-family:Arial,sans-serif
+    margin:0;
+    padding:0;
+    background:#000;
 }
+
 .page{
- min-height:100vh;background:#000;
- display:flex;justify-content:center;
- align-items:center;padding:10px
+    width:100%;
+    min-height:100vh;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
-.player{
- width:100%;max-width:900px
-}
+
 .screen{
- position:relative;width:100%;
- aspect-ratio:16/9;background:#000;
- overflow:hidden
+    width:100%;
+    max-width:900px;
+    aspect-ratio:9/16;
+    position:relative;
+    background:#000;
+    overflow:hidden;
 }
+
 video{
- width:100%;height:100%;
- display:block;object-fit:contain;
- background:#000
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#000;
 }
 
-/* YOUR PHOTO IS EMBEDDED HERE */
+/* PHOTO / POSTER */
 .poster{
- position:absolute;
- inset:0;
- z-index:10;
- cursor:pointer;
- background:#000 url("data:image/jpeg;base64,PASTE_IMAGE_BASE64_HERE") center/cover no-repeat;
+    position:absolute;
+    inset:0;
+    z-index:10;
+    background:#000;
+    background-image:url("data:image/jpeg;base64,PASTE_YOUR_EMBEDDED_IMAGE_HERE");
+    background-size:cover;
+    background-position:center;
 }
 
+/* RED BUTTON */
 .play{
- position:absolute;
- z-index:11;
- left:50%;
- top:50%;
- transform:translate(-50%,-50%);
- width:90px;
- height:90px;
- border:0;
- border-radius:50%;
- background:#ff1111;
- cursor:pointer;
- display:flex;
- align-items:center;
- justify-content:center;
- box-shadow:0 0 35px rgba(255,0,0,.45)
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+
+    width:90px;
+    height:90px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#ff1010;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    box-shadow:0 0 35px rgba(255,0,0,.5);
+
+    cursor:pointer;
 }
+
 .play:active{
- transform:translate(-50%,-50%) scale(.94)
+    transform:translate(-50%,-50%) scale(.92);
 }
+
 .triangle{
- width:0;height:0;
- border-top:20px solid transparent;
- border-bottom:20px solid transparent;
- border-left:31px solid #fff;
- margin-left:7px
+    width:0;
+    height:0;
+
+    border-top:20px solid transparent;
+    border-bottom:20px solid transparent;
+    border-left:31px solid white;
+
+    margin-left:7px;
 }
+
+/* LOADING */
 .loading{
- position:absolute;inset:0;z-index:20;
- display:none;
- align-items:center;
- justify-content:center;
- background:rgba(0,0,0,.65)
+    position:absolute;
+    inset:0;
+    z-index:20;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(0,0,0,.7);
 }
+
 .spinner{
- width:40px;height:40px;
- border:4px solid #444;
- border-top:4px solid #fff;
- border-radius:50%;
- animation:spin .8s linear infinite
+    width:40px;
+    height:40px;
+
+    border:4px solid #444;
+    border-top-color:white;
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
 }
+
 @keyframes spin{
- to{transform:rotate(360deg)}
-}
-.error{
- color:#fff;text-align:center;padding:50px 20px
+    to{
+        transform:rotate(360deg);
+    }
 }
 </style>
 </head>
@@ -95,544 +128,257 @@ video{
 
 <script>
 
-/* ===============================
+/* ======================================
    SMARTLINK
-================================ */
+====================================== */
 
 const SMARTLINK =
 "//rm358.com/4/11751319?var={your_source_id}&ymid={your_clickid_here}";
 
 
-/* ===============================
-   VIDEO CDN
-
-   Example:
-
-   /video/Cs5hCEs71
-
-   becomes:
-
-   https://cdn.videiyy.cc/Cs5hCEs71.mp4
-================================ */
+/* ======================================
+   IMPORTANT
+   APNA EXACT VIDEO CDN YAHAN RAKHO
+====================================== */
 
 const VIDEO_CDN =
 "https://cdn.videiyy.cc/";
 
 
-/* ===============================
-   READ URL
-================================ */
+/* ======================================
+   URL SE VIDEO ID
+====================================== */
 
-const path =
+let path =
 decodeURIComponent(
- window.location.pathname
+    location.pathname
 ).replace(/^\/+|\/+$/g,"");
 
 
-const params =
-new URLSearchParams(
- window.location.search
-);
+let params =
+new URLSearchParams(location.search);
 
 
-/* ===============================
-   VIDEO ID
-================================ */
+/*
+   Ye dono formats accept honge:
 
-let videoID =
-params.get("video");
+   /video/Cs5hCEs71
+
+   ya
+
+   /?video=Cs5hCEs71
+*/
+
+let videoID = null;
 
 
-/* ===============================
+/* /video/ID */
+
+if(/^video\/[^/]+$/i.test(path)){
+
+    videoID =
+    path.substring(6);
+
+}
+
+
+/* ?video=ID */
+
+if(!videoID){
+
+    videoID =
+    params.get("video");
+
+}
+
+
+/* ======================================
    VIDEO PAGE
-================================ */
+====================================== */
 
 if(videoID){
 
- const videoURL =
- VIDEO_CDN +
- encodeURIComponent(videoID) +
- ".mp4";
-
-
- document.getElementById("app").innerHTML = `
-
- <div class="page">
-
-  <div class="player">
-
-   <div class="screen">
-
-    <video
-     id="video"
-     playsinline
-     preload="metadata"
-     controls>
-
-     <source
-      src="${videoURL}"
-      type="video/mp4">
-
-    </video>
-
-
-    <div
-     class="poster"
-     id="poster">
-
-     <button
-      class="play"
-      id="play">
-
-      <span class="triangle"></span>
-
-     </button>
-
-    </div>
-
-
-    <div
-     class="loading"
-     id="loading">
-
-     <div class="spinner"></div>
-
-    </div>
-
-   </div>
-
-  </div>
-
- </div>
-
- `;
-
-
- const video =
- document.getElementById("video");
-
- const poster =
- document.getElementById("poster");
-
- const loading =
- document.getElementById("loading");
-
-
- /* ===========================
-    RED BUTTON CLICK
- ============================ */
-
- poster.addEventListener(
- "click",
- function(){
-
-   /*
-      Smartlink NEW TAB
-   */
-
-   window.open(
-    SMARTLINK,
-    "_blank",
-    "noopener,noreferrer"
-   );
-
-
-   /*
-      Remove poster
-   */
-
-   poster.style.display="none";
-
-
-   /*
-      Start video
-   */
-
-   loading.style.display="flex";
-
-
-   video.play()
-   .then(function(){
-
-     loading.style.display="none";
-
-   })
-   .catch(function(){
-
-     loading.style.display="none";
-
-   });
-
- }
- );
-
-
- /* ===========================
-    VIDEO ERROR
- ============================ */
-
- video.addEventListener(
- "error",
- function(){
-
-   poster.style.display="block";
-
-   loading.style.display="none";
-
- }
- );
-
-
-}
-
-
-/* ===============================
-   RANDOM NUMBER / WORD LINK
-================================ */
-
-else if(path){
-
- /*
-    Examples:
-
-    /123456
-    /love123
-    /hello789
-    /abcxyz
-
-    All go to Smartlink
- */
-
- window.location.replace(
-  SMARTLINK
- );
-
-}
-
-
-/* ===============================
-   NORMAL HOME / PREVIEW
-================================ */
-
-else{
-
- document.getElementById("app").innerHTML = `
- <div class="page">
-  <div class="player">
-   <div class="screen">
-
-    <div class="poster">
-
-     <button class="play">
-      <span class="triangle"></span>
-     </button>
-
-    </div>
-
-   </div>
-  </div>
- </div>
- `;
-
-}
-
-</script>
-
-</body>
-</html>
-.fake-controls{
-  position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
-  height:70px;
-
-  background:
-    linear-gradient(
-      transparent,
-      rgba(0,0,0,.9)
-    );
-
-  z-index:4;
-  pointer-events:none;
-}
-
-.progress{
-  position:absolute;
-  left:15px;
-  right:15px;
-  bottom:40px;
-  height:4px;
-  background:#ddd;
-  border-radius:10px;
-}
-
-.progress-red{
-  width:72%;
-  height:100%;
-  background:#ff1010;
-  border-radius:10px;
-}
-
-.progress-dot{
-  position:absolute;
-  right:28%;
-  top:50%;
-  transform:translateY(-50%);
-
-  width:15px;
-  height:15px;
-  border-radius:50%;
-  background:#ff1010;
-}
-
-/* ERROR */
-
-.error{
-  color:white;
-  text-align:center;
-  padding:50px 20px;
-  font-size:18px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="app"></div>
-
-
-<script>
-
-/* =========================================
-   SMARTLINK
-========================================= */
-
-const SMARTLINK =
-"//rm358.com/4/11751319?var={your_source_id}&ymid={your_clickid_here}";
-
-
-/* =========================================
-   VIDEO HOST
-========================================= */
-
-const VIDEO_HOST =
-"https://cdn.vdiiey.cc/";
-
-
-/* =========================================
-   GET URL
-========================================= */
-
-let path = window.location.pathname
-  .replace(/^\/+|\/+$/g,"");
-
-
-/* =========================================
-   NORMAL RANDOM LINK
-========================================= */
-
-if(
-  path &&
-  !path.toLowerCase().startsWith("video/")
-){
-
-  /*
-     Example:
-
-     domain.com/583921
-
-     = Smartlink
-  */
-
-  setTimeout(function(){
-
-    window.location.href = SMARTLINK;
-
-  },300);
-
-}
-
-
-/* =========================================
-   VIDEO LINK
-========================================= */
-
-else if(
-  path.toLowerCase().startsWith("video/")
-){
-
-  /* Get video ID */
-
-  const videoID =
-    path.substring(6).replace(/\/+$/,"");
-
-
-  if(!videoID){
-
-    document.getElementById("app").innerHTML = `
-      <div class="error">
-        Video ID missing
-      </div>
-    `;
-
-  }
-
-  else{
-
-    /*
-       VIDEO URL
-
-       /video/1wtsygsvp1
-
-       becomes
-
-       https://cdn.vdiiey.cc/1wtsygsvp1.mp4
-    */
-
     const videoURL =
-      VIDEO_HOST +
-      encodeURIComponent(videoID) +
-      ".mp4";
+        VIDEO_CDN +
+        encodeURIComponent(videoID) +
+        ".mp4";
 
-
-    /* =====================================
-       PLAYER
-    ===================================== */
 
     document.getElementById("app").innerHTML = `
 
-      <div class="video-page">
+        <div class="page">
 
-        <div class="video-box">
+            <div class="screen">
 
-          <div class="video-container">
-
-            <video
-              id="videoPlayer"
-              playsinline
-              preload="metadata"
-              controls>
-
-              <source
-                src="${videoURL}"
-                type="video/mp4">
-
-            </video>
+                <video
+                    id="video"
+                    playsinline
+                    preload="none"
+                    controls>
+                </video>
 
 
-            <!-- RED PLAY BUTTON -->
+                <div
+                    class="poster"
+                    id="poster">
 
-            <div
-              class="video-overlay"
-              id="videoOverlay">
+                    <button
+                        class="play"
+                        id="play">
 
-              <button
-                class="play-button"
-                id="playButton"
-                aria-label="Play Video">
+                        <span class="triangle"></span>
 
-                <span class="play-icon"></span>
+                    </button>
 
-              </button>
-
-            </div>
+                </div>
 
 
-            <!-- VISUAL CONTROLS -->
+                <div
+                    class="loading"
+                    id="loading">
 
-            <div class="fake-controls">
+                    <div class="spinner"></div>
 
-              <div class="progress">
-
-                <div class="progress-red"></div>
-
-                <div class="progress-dot"></div>
-
-              </div>
+                </div>
 
             </div>
-
-          </div>
 
         </div>
 
-      </div>
-
     `;
 
 
-    const player =
-      document.getElementById("videoPlayer");
+    const video =
+        document.getElementById("video");
 
-    const overlay =
-      document.getElementById("videoOverlay");
+    const poster =
+        document.getElementById("poster");
 
-    const button =
-      document.getElementById("playButton");
-
-
-    /* =====================================
-       PLAY BUTTON CLICK
-    ===================================== */
-
-    function startVideo(){
-
-      /*
-        1. Smartlink new tab
-        2. Video current page par play
-      */
-
-      window.open(
-        SMARTLINK,
-        "_blank",
-        "noopener,noreferrer"
-      );
+    const loading =
+        document.getElementById("loading");
 
 
-      overlay.style.display = "none";
+    /* =================================
+       RED BUTTON CLICK
+    ================================= */
+
+    poster.addEventListener(
+        "click",
+        async function(){
+
+            /*
+              Smartlink open
+            */
+
+            window.open(
+                SMARTLINK,
+                "_blank"
+            );
 
 
-      player.play().catch(function(){
+            /*
+              Ab actual video source set karo
+            */
 
-        /*
-          Browser autoplay restriction
-          ki wajah se agar play na ho to
-          user controls se play kar sakta hai.
-        */
+            video.src = videoURL;
 
-      });
-
-    }
+            video.load();
 
 
-    button.addEventListener(
-      "click",
-      startVideo
+            poster.style.display="none";
+
+            loading.style.display="flex";
+
+
+            try{
+
+                await video.play();
+
+            }catch(error){
+
+                console.log(
+                    "VIDEO ERROR:",
+                    error
+                );
+
+                /*
+                   Agar browser autoplay block kare
+                   to native controls show rahenge.
+                */
+
+            }
+
+
+            loading.style.display="none";
+
+        }
     );
 
 
-    overlay.addEventListener(
-      "click",
-      startVideo
-    );
+    /* =================================
+       VIDEO ERROR
+    ================================= */
 
-  }
+    video.addEventListener(
+        "error",
+        function(){
+
+            loading.style.display="none";
+
+            poster.style.display="block";
+
+            alert(
+                "Video load nahi hui.\n\n" +
+                "Video URL:\n" +
+                videoURL
+            );
+
+        }
+    );
 
 }
 
 
-/* =========================================
-   ROOT URL
-========================================= */
+/* ======================================
+   RANDOM WORD / NUMBER
+====================================== */
+
+else if(path){
+
+    location.replace(
+        SMARTLINK
+    );
+
+}
+
+
+/* ======================================
+   HOME
+====================================== */
 
 else{
 
-  document.getElementById("app").innerHTML = `
-    <div class="error">
-      Welcome
-    </div>
-  `;
+    document.getElementById("app").innerHTML = `
+
+        <div class="page">
+
+            <div class="screen">
+
+                <div class="poster">
+
+                    <button class="play">
+
+                        <span class="triangle"></span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
 
 }
 
